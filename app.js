@@ -106,14 +106,10 @@ function createPieceElement(pieceData) {
 
 function startDrag(e) {
     if (activePiece) return;
-    e.preventDefault();
     
     activePiece = e.currentTarget;
     const rect = activePiece.getBoundingClientRect();
     
-    originalPieceX = rect.left;
-    originalPieceY = rect.top;
-
     const clientX = e.type === 'touchstart' ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === 'touchstart' ? e.touches[0].clientY : e.clientY;
 
@@ -123,7 +119,8 @@ function startDrag(e) {
     activePiece.style.position = 'fixed';
     activePiece.style.width = rect.width + 'px';
     activePiece.style.zIndex = '1000';
-    activePiece.style.transform = 'scale(1.1)';
+    activePiece.style.transform = 'scale(1.2)';
+    activePiece.style.pointerEvents = 'none'; // Crucial for elementFromPoint to work
     
     updateDragPosition(clientX, clientY);
 
@@ -135,24 +132,27 @@ function startDrag(e) {
 
 function onDrag(e) {
     if (!activePiece) return;
+    if (e.type === 'touchmove') e.preventDefault(); // Prevent scrolling while dragging
+
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
     updateDragPosition(clientX, clientY);
 }
 
 function updateDragPosition(x, y) {
+    // Offset the piece so it's visible above the finger/cursor
     activePiece.style.left = (x - dragStartX) + 'px';
-    activePiece.style.top = (y - dragStartY - 50) + 'px'; // Offset slightly upward for better visibility
+    activePiece.style.top = (y - dragStartY - 60) + 'px'; 
 }
 
 function endDrag(e) {
     if (!activePiece) return;
 
     const rect = activePiece.getBoundingClientRect();
+    // Use the visual center of the piece for placement
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    // Check if over grid
     const cellBelow = document.elementFromPoint(centerX, centerY);
     const gridCell = cellBelow ? cellBelow.closest('.grid-cell') : null;
 
@@ -160,7 +160,6 @@ function endDrag(e) {
         const targetX = parseInt(gridCell.dataset.x);
         const targetY = parseInt(gridCell.dataset.y);
         
-        // Try to place the piece
         if (tryPlacePiece(activePiece, targetX, targetY)) {
             activePiece.remove();
             checkLines();
@@ -177,7 +176,10 @@ function endDrag(e) {
         resetPiecePosition();
     }
 
-    activePiece.style.transform = 'scale(1)';
+    if (activePiece) {
+        activePiece.style.pointerEvents = 'auto';
+        activePiece.style.transform = 'scale(1)';
+    }
     activePiece = null;
     document.removeEventListener('mousemove', onDrag);
     document.removeEventListener('touchmove', onDrag);

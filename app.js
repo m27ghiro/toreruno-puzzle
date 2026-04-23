@@ -23,36 +23,37 @@ let currentPiecesData = [];
 let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer;
 
 function init() {
-    gridContainer = document.getElementById('grid-container');
-    pieceTray = document.getElementById('piece-tray');
-    scoreElement = document.getElementById('score');
-    gameOverOverlay = document.getElementById('game-over-overlay');
-    finalScoreVal = document.getElementById('final-score-val');
-    restartBtn = document.getElementById('restart-btn');
-    mainMenu = document.getElementById('main-menu');
-    undoBtn = document.getElementById('undo-btn');
-    homeBtn = document.getElementById('home-btn');
-    flashLayer = document.getElementById('flash-layer');
+    try {
+        gridContainer = document.getElementById('grid-container');
+        pieceTray = document.getElementById('piece-tray');
+        scoreElement = document.getElementById('score');
+        gameOverOverlay = document.getElementById('game-over-overlay');
+        finalScoreVal = document.getElementById('final-score-val');
+        restartBtn = document.getElementById('restart-btn');
+        mainMenu = document.getElementById('main-menu');
+        undoBtn = document.getElementById('undo-btn');
+        homeBtn = document.getElementById('home-btn');
+        flashLayer = document.getElementById('flash-layer');
 
-    document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            initGame(parseInt(btn.dataset.size));
+        document.querySelectorAll('.difficulty-btn').forEach(btn => {
+            btn.addEventListener('click', () => initGame(parseInt(btn.dataset.size)));
         });
-    });
 
-    restartBtn.addEventListener('click', () => {
-        gameOverOverlay.classList.add('hidden');
-        mainMenu.classList.remove('hidden');
-    });
+        restartBtn.addEventListener('click', () => {
+            gameOverOverlay.classList.add('hidden');
+            mainMenu.classList.remove('hidden');
+        });
 
-    homeBtn.addEventListener('click', () => {
-        mainMenu.classList.remove('hidden');
-    });
+        homeBtn.addEventListener('click', () => {
+            mainMenu.classList.remove('hidden');
+            gameOverOverlay.classList.add('hidden');
+        });
 
-    undoBtn.addEventListener('click', undo);
-    
-    // Initial UI update
-    updateScore();
+        undoBtn.addEventListener('click', undo);
+        updateScore();
+    } catch (e) {
+        console.error("Init Error:", e);
+    }
 }
 
 function initGame(size) {
@@ -84,7 +85,7 @@ function renderGrid() {
 }
 
 function updateScore() {
-    scoreElement.textContent = score;
+    if (scoreElement) scoreElement.textContent = score;
     if (undoBtn) {
         undoBtn.disabled = !lastState;
         undoBtn.style.opacity = lastState ? "1" : "0.3";
@@ -110,6 +111,7 @@ function createPieceElement(piece, index) {
     gridEl.className = 'piece-grid';
     gridEl.style.display = 'grid';
     gridEl.style.gridTemplateColumns = `repeat(${piece.shape[0].length}, 1fr)`;
+    gridEl.style.gap = '2px';
 
     const centerY = Math.floor(piece.shape.length / 2);
     const centerX = Math.floor(piece.shape[0].length / 2);
@@ -165,9 +167,7 @@ function startDrag(e) {
     const endHandler = (ee) => {
         const ex = ee.type.startsWith('touch') ? ee.changedTouches[0].clientX : ee.clientX;
         const ey = ee.type.startsWith('touch') ? ee.changedTouches[0].clientY : ee.clientY;
-        
         handleDrop(ex, ey);
-        
         document.removeEventListener('mousemove', moveHandler);
         document.removeEventListener('touchmove', moveHandler);
         document.removeEventListener('mouseup', endHandler);
@@ -189,19 +189,18 @@ function handleDrop(x, y) {
     const gridRect = gridContainer.getBoundingClientRect();
     const cellSize = gridRect.width / GRID_SIZE;
     
+    // Drop coordinates adjustment
     const gx = Math.floor((x - gridRect.left) / cellSize);
-    const gy = Math.floor((y - 70 - gridRect.top) / cellSize); // Adjust for drag offset
+    const gy = Math.floor((y - 70 - gridRect.top) / cellSize); 
 
     if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE) {
         const pieceIdx = parseInt(activePiece.dataset.index);
         const piece = currentPiecesData[pieceIdx];
-        
         if (canPlace(piece, gx, gy)) {
             saveState();
             placePiece(piece, gx, gy);
             activePiece.remove();
             activePiece = null;
-            
             checkLines();
             if (pieceTray.children.length === 0) generatePieces();
             if (isGameOver()) showGameOver();
@@ -219,7 +218,6 @@ function canPlace(piece, centerX, centerY) {
     const shape = piece.shape;
     const offX = Math.floor(shape[0].length / 2);
     const offY = Math.floor(shape.length / 2);
-    
     for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
             if (shape[y][x]) {
@@ -302,8 +300,4 @@ function showGameOver() {
     finalScoreVal.textContent = score;
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+init();

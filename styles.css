@@ -2,6 +2,7 @@
     --primary-green: #2ecc71;
     --dark-green: #27ae60;
     --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    --grid-size: 42vh; /* JSで可変にする変数 */
 }
 
 * {
@@ -21,7 +22,7 @@ body {
 .app-wrapper {
     width: 100%; max-width: 420px;
     height: 100%; display: flex; flex-direction: column;
-    padding: 10px;
+    padding: 8px;
 }
 
 header {
@@ -33,11 +34,18 @@ header {
 #score-display { font-weight: bold; font-size: 18px; color: var(--dark-green); }
 
 .nav-bar {
-    display: flex; gap: 8px; margin-bottom: 5px; flex-shrink: 0;
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px; flex-shrink: 0; background: rgba(255,255,255,0.4);
+    padding: 5px 10px; border-radius: 15px; gap: 10px;
 }
 
+.zoom-controls { display: flex; align-items: center; gap: 5px; flex: 1; }
+#zoom-slider { flex: 1; accent-color: var(--primary-green); }
+
+.btn-group { display: flex; gap: 5px; }
+
 .nav-btn {
-    flex: 1; padding: 8px; font-size: 12px; font-weight: bold;
+    padding: 6px 10px; font-size: 11px; font-weight: bold;
     background: white; border: 2px solid var(--primary-green);
     border-radius: 12px; color: var(--dark-green);
 }
@@ -48,10 +56,9 @@ main {
     min-height: 0;
 }
 
-/* 盤面サイズを絶対に消えない「画面の4割」の高さに固定 */
 .grid-container {
-    height: 42vh; width: 42vh; /* 高さを基準に正方形を作る */
-    max-width: 85vw; max-height: 85vw; /* 幅広画面でもはみ出さないように */
+    height: var(--grid-size); width: var(--grid-size);
+    max-width: 85vw; max-height: 85vw;
     background: rgba(255,255,255,0.9);
     border-radius: 10px; display: grid; gap: 2px; padding: 5px;
     box-shadow: 0 5px 25px rgba(0,0,0,0.1);
@@ -64,7 +71,7 @@ main {
 }
 
 .grid-cell.highlight {
-    background: rgba(46, 204, 113, 0.4); /* ガイドを少し濃く */
+    background: rgba(46, 204, 113, 0.4);
 }
 
 .piece-tray {
@@ -74,8 +81,6 @@ main {
     flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05);
 }
 
-.draggable-piece { display: flex; justify-content: center; align-items: center; }
-.piece-grid { display: grid; gap: 2px; }
 .piece-block {
     width: 22px; height: 22px;
     background: var(--primary-green); border-radius: 2px;

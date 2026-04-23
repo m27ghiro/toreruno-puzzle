@@ -20,7 +20,7 @@ let dragStartX, dragStartY;
 let lastState = null;
 let currentPiecesData = [];
 
-let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer;
+let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer, zoomSlider;
 
 function init() {
     gridContainer = document.getElementById('grid-container');
@@ -33,6 +33,7 @@ function init() {
     undoBtn = document.getElementById('undo-btn');
     homeBtn = document.getElementById('home-btn');
     flashLayer = document.getElementById('flash-layer');
+    zoomSlider = document.getElementById('zoom-slider');
 
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
         btn.addEventListener('click', () => initGame(parseInt(btn.dataset.size)));
@@ -49,6 +50,12 @@ function init() {
     });
 
     undoBtn.addEventListener('click', undo);
+    
+    // Zoom Logic
+    zoomSlider.addEventListener('input', (e) => {
+        document.documentElement.style.setProperty('--grid-size', e.target.value + 'vh');
+    });
+
     updateScore();
 }
 
@@ -334,8 +341,4 @@ function showGameOver() {
     finalScoreVal.textContent = score;
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-} else {
-    init();
-}
+init();

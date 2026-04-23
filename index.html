@@ -14,8 +14,14 @@
         </header>
 
         <div class="nav-bar">
-            <button id="home-btn" class="nav-btn">🏠HOME</button>
-            <button id="undo-btn" class="nav-btn">↩UNDO</button>
+            <div class="zoom-controls">
+                <span>🔍</span>
+                <input type="range" id="zoom-slider" min="30" max="60" value="42" step="1">
+            </div>
+            <div class="btn-group">
+                <button id="home-btn" class="nav-btn">🏠HOME</button>
+                <button id="undo-btn" class="nav-btn">↩UNDO</button>
+            </div>
         </div>
 
         <main>
@@ -31,6 +37,7 @@
                     <button class="difficulty-btn" data-size="8">EASY (8x8)</button>
                     <button class="difficulty-btn" data-size="10">NORMAL (10x10)</button>
                 </div>
+                <p style="font-size: 11px; color: #999; margin-top: 20px;">※画面のサイズは上のスライダーで調整できます</p>
             </div>
         </div>
 

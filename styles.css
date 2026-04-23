@@ -1,7 +1,6 @@
 :root {
     --primary-green: #2ecc71;
     --dark-green: #27ae60;
-    --text-color: #2c3e50;
     --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
 }
 
@@ -12,113 +11,83 @@
 }
 
 body {
-    font-family: 'Outfit', 'Noto Sans JP', sans-serif;
+    font-family: sans-serif;
     background: var(--bg-gradient);
-    height: 100vh;
+    height: 100vh; width: 100%;
     display: flex; justify-content: center; overflow: hidden;
-    position: fixed; width: 100%;
+    position: fixed;
 }
 
 .app-wrapper {
     width: 100%; max-width: 450px;
-    height: 100%;
-    display: flex; flex-direction: column;
+    height: 100%; display: flex; flex-direction: column;
     padding: 10px;
 }
 
 header {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 8px; margin-bottom: 10px; flex-shrink: 0;
+    flex-shrink: 0; display: flex; flex-direction: column; align-items: center;
+    gap: 5px; margin-bottom: 10px;
 }
 
-.header-logo {
-    height: 50px; /* 適正サイズに縮小 */
-    object-fit: contain;
-}
-
-.header-info {
-    width: 100%;
-    display: flex; justify-content: space-between; align-items: center;
-}
-
-.score-box {
-    display: flex; flex-direction: column;
-}
-.score-box .label { font-size: 10px; color: var(--dark-green); font-weight: 700; }
-.score-box .value { font-size: 26px; font-weight: 800; line-height: 1; }
-
+.header-logo { height: 45px; object-fit: contain; }
+.header-info { width: 100%; display: flex; justify-content: space-between; align-items: center; }
+.score-box { display: flex; flex-direction: column; }
+.score-box .label { font-size: 10px; color: var(--dark-green); font-weight: bold; }
+.score-box .value { font-size: 24px; font-weight: bold; }
 .btn-group { display: flex; gap: 5px; }
-.nav-btn {
-    padding: 8px 12px; font-size: 12px; font-weight: 700;
-    background: white; border: 2px solid var(--primary-green);
-    color: var(--dark-green); border-radius: 15px;
-}
+.nav-btn { padding: 6px 10px; font-size: 11px; font-weight: bold; border-radius: 10px; border: 1px solid var(--primary-green); background: white; }
 
 main {
-    flex: 1;
-    display: flex; flex-direction: column;
-    justify-content: space-between; /* 盤面とトレイを離す */
-    align-items: center;
-    padding: 5px 0;
+    flex: 1; display: flex; flex-direction: column;
+    justify-content: space-between; align-items: center;
+    overflow: hidden; /* 防止メインエリアがはみ出すのを防ぐ */
+}
+
+#grid-wrapper {
+    width: 100%;
+    max-height: 60vh; /* 盤面が画面の6割を超えないように制限 */
+    display: flex; justify-content: center;
 }
 
 .grid-container {
-    width: 100%; aspect-ratio: 1/1;
-    background: rgba(255,255,255,0.8);
-    border-radius: 12px;
-    display: grid; gap: 3px; padding: 6px;
-    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    height: 100%; aspect-ratio: 1/1;
+    background: rgba(255,255,255,0.9);
+    border-radius: 10px; display: grid; gap: 2px; padding: 5px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
 }
 
-.grid-cell {
-    background: rgba(0,0,0,0.05); border-radius: 3px;
-    position: relative;
-}
-
+.grid-cell { background: rgba(0,0,0,0.05); border-radius: 2px; position: relative; }
 .grid-cell.filled::after {
-    content: ''; position: absolute;
-    top: 5%; left: 5%; width: 90%; height: 90%;
+    content: ''; position: absolute; top: 5%; left: 5%; width: 90%; height: 90%;
     background: var(--primary-green); border-radius: 2px;
-    animation: pop 0.2s ease-out;
 }
-
-@keyframes pop { from { transform: scale(0.5); } to { transform: scale(1); } }
 
 .piece-tray {
-    width: 100%; height: 110px;
-    background: rgba(255,255,255,0.3);
-    border-radius: 20px;
-    display: flex; justify-content: space-around; align-items: center;
-    padding: 10px; flex-shrink: 0;
+    width: 100%; height: 100px;
+    background: rgba(255,255,255,0.5); /* 視認性を上げる */
+    border-radius: 15px; display: flex; justify-content: space-around; align-items: center;
+    padding: 5px; flex-shrink: 0;
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
+.draggable-piece { display: flex; justify-content: center; align-items: center; }
+.piece-grid { display: grid; gap: 2px; }
 .piece-block {
-    width: 20px; height: 20px;
+    width: 18px; height: 18px; /* 少し小さくして確実に収める */
     background: var(--primary-green); border-radius: 2px;
     display: flex; justify-content: center; align-items: center;
 }
 .piece-block img { width: 70%; height: 70%; object-fit: contain; }
 
-/* Overlays */
 .overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: white; z-index: 1000;
-    display: flex; justify-content: center; align-items: center;
+    background: white; z-index: 1000; display: flex; justify-content: center; align-items: center;
 }
 .overlay.hidden { display: none; }
+.overlay-content { text-align: center; width: 85%; }
+.menu-logo { height: 70px; margin-bottom: 20px; }
+.difficulty-btn { width: 100%; padding: 15px; margin-bottom: 10px; border-radius: 20px; border: 2px solid var(--primary-green); font-weight: bold; }
 
-.overlay-content { text-align: center; width: 80%; }
-.menu-logo { height: 80px; margin-bottom: 20px; }
-
-.difficulty-btn {
-    width: 100%; padding: 15px; margin-bottom: 10px;
-    background: var(--soft-white); border: 2px solid var(--primary-green);
-    border-radius: 30px; font-weight: 700; font-size: 18px;
-}
-
-.flash-layer {
-    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: white; opacity: 0; pointer-events: none; z-index: 2000;
-}
+.flash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 2000; }
 .flash-active { animation: flash 0.3s ease-out; }
-@keyframes flash { 0% { opacity: 0.6; } 100% { opacity: 0; } }
+@keyframes flash { 0% { opacity: 0.5; } 100% { opacity: 0; } }

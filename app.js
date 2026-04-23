@@ -18,7 +18,7 @@ let score = 0;
 let activePiece = null;
 let dragStartX, dragStartY;
 let lastState = null;
-let currentPiecesData = []; // Store data of pieces currently in tray
+let currentPiecesData = [];
 
 let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer;
 
@@ -35,7 +35,9 @@ function init() {
     flashLayer = document.getElementById('flash-layer');
 
     document.querySelectorAll('.difficulty-btn').forEach(btn => {
-        btn.addEventListener('click', () => initGame(parseInt(btn.dataset.size)));
+        btn.addEventListener('click', () => {
+            initGame(parseInt(btn.dataset.size));
+        });
     });
 
     restartBtn.addEventListener('click', () => {
@@ -43,8 +45,14 @@ function init() {
         mainMenu.classList.remove('hidden');
     });
 
-    homeBtn.addEventListener('click', () => mainMenu.classList.remove('hidden'));
+    homeBtn.addEventListener('click', () => {
+        mainMenu.classList.remove('hidden');
+    });
+
     undoBtn.addEventListener('click', undo);
+    
+    // Initial UI update
+    updateScore();
 }
 
 function initGame(size) {
@@ -77,8 +85,10 @@ function renderGrid() {
 
 function updateScore() {
     scoreElement.textContent = score;
-    undoBtn.disabled = !lastState;
-    undoBtn.style.opacity = lastState ? "1" : "0.3";
+    if (undoBtn) {
+        undoBtn.disabled = !lastState;
+        undoBtn.style.opacity = lastState ? "1" : "0.3";
+    }
 }
 
 function generatePieces() {
@@ -100,7 +110,6 @@ function createPieceElement(piece, index) {
     gridEl.className = 'piece-grid';
     gridEl.style.display = 'grid';
     gridEl.style.gridTemplateColumns = `repeat(${piece.shape[0].length}, 1fr)`;
-    gridEl.style.gap = '2px';
 
     const centerY = Math.floor(piece.shape.length / 2);
     const centerX = Math.floor(piece.shape[0].length / 2);
@@ -173,20 +182,15 @@ function startDrag(e) {
 
 function updateDragPosition(x, y) {
     activePiece.style.left = (x - dragStartX) + 'px';
-    activePiece.style.top = (y - dragStartY - 70) + 'px'; // Finger offset
+    activePiece.style.top = (y - dragStartY - 70) + 'px'; 
 }
 
 function handleDrop(x, y) {
-    const rect = activePiece.getBoundingClientRect();
-    const cx = rect.left + rect.width / 2;
-    const cy = rect.top + rect.height / 2;
-
     const gridRect = gridContainer.getBoundingClientRect();
     const cellSize = gridRect.width / GRID_SIZE;
     
-    // Exact coordinate calculation
-    const gx = Math.floor((cx - gridRect.left) / cellSize);
-    const gy = Math.floor((cy - gridRect.top) / cellSize);
+    const gx = Math.floor((x - gridRect.left) / cellSize);
+    const gy = Math.floor((y - 70 - gridRect.top) / cellSize); // Adjust for drag offset
 
     if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE) {
         const pieceIdx = parseInt(activePiece.dataset.index);
@@ -205,7 +209,6 @@ function handleDrop(x, y) {
         }
     }
 
-    // Reset
     activePiece.style.position = 'static';
     activePiece.style.transform = 'scale(1)';
     activePiece.style.pointerEvents = 'auto';
@@ -220,11 +223,9 @@ function canPlace(piece, centerX, centerY) {
     for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
             if (shape[y][x]) {
-                const targetX = centerX - offX + x;
-                const targetY = centerY - offY + y;
-                if (targetX < 0 || targetX >= GRID_SIZE || targetY < 0 || targetY >= GRID_SIZE || grid[targetY][targetX]) {
-                    return false;
-                }
+                const tx = centerX - offX + x;
+                const ty = centerY - offY + y;
+                if (tx < 0 || tx >= GRID_SIZE || ty < 0 || ty >= GRID_SIZE || grid[ty][tx]) return false;
             }
         }
     }
@@ -237,9 +238,7 @@ function placePiece(piece, centerX, centerY) {
     const offY = Math.floor(shape.length / 2);
     for (let y = 0; y < shape.length; y++) {
         for (let x = 0; x < shape[y].length; x++) {
-            if (shape[y][x]) {
-                grid[centerY - offY + y][centerX - offX + x] = 1;
-            }
+            if (shape[y][x]) grid[centerY - offY + y][centerX - offX + x] = 1;
         }
     }
     renderGrid();
@@ -279,12 +278,8 @@ function undo() {
     grid = lastState.grid;
     score = lastState.score;
     currentPiecesData = [...lastState.pieces];
-    
     pieceTray.innerHTML = '';
-    lastState.trayIndices.forEach(idx => {
-        createPieceElement(currentPiecesData[idx], idx);
-    });
-
+    lastState.trayIndices.forEach(idx => createPieceElement(currentPiecesData[idx], idx));
     lastState = null;
     updateScore();
     renderGrid();
@@ -307,4 +302,8 @@ function showGameOver() {
     finalScoreVal.textContent = score;
 }
 
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

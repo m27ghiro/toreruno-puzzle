@@ -104,6 +104,8 @@ function createPieceElement(pieceData) {
     pieceWrapper.addEventListener('touchstart', startDrag, { passive: false });
 }
 
+let lastX, lastY;
+
 function startDrag(e) {
     if (activePiece) return;
     
@@ -115,12 +117,14 @@ function startDrag(e) {
 
     dragStartX = clientX - rect.left;
     dragStartY = clientY - rect.top;
+    lastX = clientX;
+    lastY = clientY;
 
     activePiece.style.position = 'fixed';
     activePiece.style.width = rect.width + 'px';
     activePiece.style.zIndex = '1000';
     activePiece.style.transform = 'scale(1.2)';
-    activePiece.style.pointerEvents = 'none'; // Crucial for elementFromPoint to work
+    activePiece.style.pointerEvents = 'none';
     
     updateDragPosition(clientX, clientY);
 
@@ -132,15 +136,17 @@ function startDrag(e) {
 
 function onDrag(e) {
     if (!activePiece) return;
-    if (e.type === 'touchmove') e.preventDefault(); // Prevent scrolling while dragging
+    if (e.type === 'touchmove') e.preventDefault();
 
     const clientX = e.type === 'touchmove' ? e.touches[0].clientX : e.clientX;
     const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
+    lastX = clientX;
+    lastY = clientY;
+    
     updateDragPosition(clientX, clientY);
 }
 
 function updateDragPosition(x, y) {
-    // Offset the piece so it's visible above the finger/cursor
     activePiece.style.left = (x - dragStartX) + 'px';
     activePiece.style.top = (y - dragStartY - 60) + 'px'; 
 }
@@ -148,8 +154,12 @@ function updateDragPosition(x, y) {
 function endDrag(e) {
     if (!activePiece) return;
 
+    // Use the last known coordinates because touchend might not have them
+    const checkX = e.type === 'touchend' ? lastX : e.clientX;
+    const checkY = e.type === 'touchend' ? lastY : e.clientY;
+
+    // For better UX on mobile, we find the cell under the visual block center
     const rect = activePiece.getBoundingClientRect();
-    // Use the visual center of the piece for placement
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
@@ -179,6 +189,8 @@ function endDrag(e) {
     if (activePiece) {
         activePiece.style.pointerEvents = 'auto';
         activePiece.style.transform = 'scale(1)';
+        activePiece.style.position = 'static';
+        activePiece.style.width = 'auto';
     }
     activePiece = null;
     document.removeEventListener('mousemove', onDrag);

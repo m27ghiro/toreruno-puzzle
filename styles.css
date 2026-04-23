@@ -49,8 +49,38 @@ header {
     height: 60px;
 }
 
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
 .header-logo {
     height: 40px;
+}
+
+.undo-btn {
+    padding: 6px 15px;
+    background: white;
+    border: 1px solid var(--primary-green);
+    color: var(--dark-green);
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.undo-btn:active {
+    background: var(--soft-white);
+    transform: scale(0.95);
+}
+
+.undo-btn.disabled {
+    opacity: 0.3;
+    pointer-events: none;
+    filter: grayscale(1);
 }
 
 .score-container {

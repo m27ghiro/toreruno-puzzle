@@ -2,11 +2,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const gridContainer = document.getElementById('grid-container');
     const pieceTray = document.getElementById('piece-tray');
     const scoreElement = document.getElementById('score');
-    const gameOverOverlay = document.getElementById('game-over-overlay');
     const finalScoreVal = document.getElementById('final-score-val');
     const restartBtn = document.getElementById('restart-btn');
     const mainMenu = document.getElementById('main-menu');
     const difficultyBtns = document.querySelectorAll('.difficulty-btn');
+    const undoBtn = document.getElementById('undo-btn');
 
     let GRID_SIZE = 10;
     let grid = [];
@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let activePiece = null;
     let dragStartX, dragStartY;
     let lastX, lastY;
+    let lastState = null; // Store previous state for Undo
 
     // Piece Definitions (shapes)
     const PIECE_TYPES = [
@@ -37,6 +38,8 @@ document.addEventListener('DOMContentLoaded', () => {
         
         grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
         score = 0;
+        lastState = null;
+        updateUndoButton();
         updateScore();
         renderGrid();
         generatePieces();
@@ -168,7 +171,16 @@ document.addEventListener('DOMContentLoaded', () => {
         const targetY = Math.round((centerY - gridRect.top - cellSize / 2) / cellSize);
 
         if (targetX >= -2 && targetX < GRID_SIZE + 2 && targetY >= -2 && targetY < GRID_SIZE + 2) {
+            // Save current state BEFORE placing the piece
+            const currentState = {
+                grid: JSON.parse(JSON.stringify(grid)),
+                score: score,
+                pieces: Array.from(pieceTray.children).map(p => p.cloneNode(true))
+            };
+
             if (tryPlacePiece(activePiece, targetX, targetY)) {
+                lastState = currentState;
+                updateUndoButton();
                 activePiece.remove();
                 checkLines();
                 if (pieceTray.children.length === 0) {
@@ -332,6 +344,35 @@ document.addEventListener('DOMContentLoaded', () => {
         gameOverOverlay.classList.remove('hidden');
         finalScoreVal.textContent = score;
     }
+
+    function undo() {
+        if (!lastState) return;
+        
+        grid = lastState.grid;
+        score = lastState.score;
+        pieceTray.innerHTML = '';
+        lastState.pieces.forEach(p => {
+            // Re-attach event listeners to cloned pieces
+            p.addEventListener('mousedown', startDrag);
+            p.addEventListener('touchstart', startDrag, { passive: false });
+            pieceTray.appendChild(p);
+        });
+        
+        lastState = null; // Can only undo once
+        updateUndoButton();
+        updateScore();
+        renderGrid();
+    }
+
+    function updateUndoButton() {
+        if (lastState) {
+            undoBtn.classList.remove('disabled');
+        } else {
+            undoBtn.classList.add('disabled');
+        }
+    }
+
+    undoBtn.addEventListener('click', undo);
 
     restartBtn.addEventListener('click', () => {
         gameOverOverlay.classList.add('hidden');

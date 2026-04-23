@@ -5,8 +5,10 @@ const scoreElement = document.getElementById('score');
 const gameOverOverlay = document.getElementById('game-over-overlay');
 const finalScoreVal = document.getElementById('final-score-val');
 const restartBtn = document.getElementById('restart-btn');
+const mainMenu = document.getElementById('main-menu');
+const difficultyBtns = document.querySelectorAll('.difficulty-btn');
 
-let grid = Array(GRID_SIZE).fill().map(() => Array(GRID_SIZE).fill(0));
+let grid = [];
 let score = 0;
 let activePiece = null;
 let dragStartX, dragStartY;
@@ -154,22 +156,19 @@ function updateDragPosition(x, y) {
 function endDrag(e) {
     if (!activePiece) return;
 
-    // Use the last known coordinates because touchend might not have them
-    const checkX = e.type === 'touchend' ? lastX : e.clientX;
-    const checkY = e.type === 'touchend' ? lastY : e.clientY;
-
-    // For better UX on mobile, we find the cell under the visual block center
+    // Use a more lenient "snapping" logic
     const rect = activePiece.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
 
-    const cellBelow = document.elementFromPoint(centerX, centerY);
-    const gridCell = cellBelow ? cellBelow.closest('.grid-cell') : null;
+    const gridRect = gridContainer.getBoundingClientRect();
+    const cellSize = gridRect.width / GRID_SIZE;
 
-    if (gridCell) {
-        const targetX = parseInt(gridCell.dataset.x);
-        const targetY = parseInt(gridCell.dataset.y);
-        
+    // Calculate grid coordinates based on piece center relative to grid top-left
+    const targetX = Math.round((centerX - gridRect.left - cellSize / 2) / cellSize);
+    const targetY = Math.round((centerY - gridRect.top - cellSize / 2) / cellSize);
+
+    if (targetX >= -2 && targetX < GRID_SIZE + 2 && targetY >= -2 && targetY < GRID_SIZE + 2) {
         if (tryPlacePiece(activePiece, targetX, targetY)) {
             activePiece.remove();
             checkLines();
@@ -200,9 +199,10 @@ function endDrag(e) {
 }
 
 function resetPiecePosition() {
+    activePiece.style.pointerEvents = 'auto';
     activePiece.style.position = 'static';
     activePiece.style.width = 'auto';
-    activePiece.style.zIndex = '1';
+    activePiece.style.transform = 'scale(1)';
 }
 
 function tryPlacePiece(pieceEl, startX, startY) {
@@ -250,15 +250,12 @@ function tryPlacePiece(pieceEl, startX, startY) {
 }
 
 function checkLines() {
-    let linesCleared = 0;
-    const rowsToClear = [];
-    const colsToClear = [];
+    let rowsToClear = [];
+    let colsToClear = [];
 
     // Check rows
     for (let y = 0; y < GRID_SIZE; y++) {
-        if (grid[y].every(cell => cell === 1)) {
-            rowsToClear.push(y);
-        }
+        if (grid[y].every(cell => cell === 1)) rowsToClear.push(y);
     }
 
     // Check columns
@@ -273,25 +270,37 @@ function checkLines() {
         if (colFull) colsToClear.push(x);
     }
 
-    // Clear and score
-    rowsToClear.forEach(y => {
-        grid[y] = Array(GRID_SIZE).fill(0);
-        linesCleared++;
-    });
+    if (rowsToClear.length > 0 || colsToClear.length > 0) {
+        animateClearing(rowsToClear, colsToClear);
+        const linesCleared = rowsToClear.length + colsToClear.length;
+        score += linesCleared * 100 * linesCleared;
+        updateScore();
+    }
+}
 
-    colsToClear.forEach(x => {
-        for (let y = 0; y < GRID_SIZE; y++) {
+function animateClearing(rows, cols) {
+    const cells = document.querySelectorAll('.grid-cell');
+    
+    rows.forEach(y => {
+        for (let x = 0; x < GRID_SIZE; x++) {
+            const cell = cells[y * GRID_SIZE + x];
+            cell.classList.add('clearing');
             grid[y][x] = 0;
         }
-        linesCleared++;
     });
 
-    if (linesCleared > 0) {
-        score += linesCleared * 100 * linesCleared; // Bonus for combo
-        updateScore();
+    cols.forEach(x => {
+        for (let y = 0; y < GRID_SIZE; y++) {
+            const cell = cells[y * GRID_SIZE + x];
+            cell.classList.add('clearing');
+            grid[y][x] = 0;
+        }
+    });
+
+    // Wait for animation then re-render
+    setTimeout(() => {
         renderGrid();
-        // Add a "clear" effect (optional)
-    }
+    }, 400);
 }
 
 function checkGameOver() {
@@ -333,7 +342,17 @@ function showGameOver() {
     finalScoreVal.textContent = score;
 }
 
-restartBtn.addEventListener('click', initGame);
+restartBtn.addEventListener('click', () => {
+    gameOverOverlay.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
+});
 
-// Start the game
-initGame();
+difficultyBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        const size = parseInt(btn.dataset.size);
+        initGame(size);
+    });
+});
+
+// Show menu initially
+// (Removed auto-initGame call)

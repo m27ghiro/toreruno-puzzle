@@ -98,6 +98,22 @@ main {
 .grid-cell.filled {
     background: var(--primary-green);
     box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+    animation: popIn 0.2s ease-out;
+}
+
+.grid-cell.clearing {
+    animation: clearPop 0.4s ease-in forwards;
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.8); opacity: 0.5; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes clearPop {
+    0% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.2); opacity: 0.8; background: #fff; }
+    100% { transform: scale(0); opacity: 0; }
 }
 
 /* Piece Tray */
@@ -168,7 +184,40 @@ main {
 
 .overlay-content {
     text-align: center;
+    padding: 30px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
     animation: fadeInScale 0.5s ease-out;
+}
+
+.menu-logo {
+    height: 80px;
+    margin-bottom: 20px;
+}
+
+.difficulty-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 30px;
+}
+
+.difficulty-btn {
+    padding: 15px 40px;
+    background: var(--soft-white);
+    border: 2px solid var(--primary-green);
+    color: var(--dark-green);
+    border-radius: 30px;
+    font-size: 18px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.difficulty-btn:hover {
+    background: var(--primary-green);
+    color: white;
 }
 
 @keyframes fadeInScale {

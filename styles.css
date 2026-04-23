@@ -2,13 +2,15 @@
     --primary-green: #2ecc71;
     --dark-green: #27ae60;
     --bg-gradient: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-    --grid-size: 42vh; /* JSで可変にする変数 */
+    --grid-size: 42vh;
 }
 
 * {
     margin: 0; padding: 0; box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
-    user-select: none; touch-action: none;
+    user-select: none;
+    /* 全体はtouch-action noneだが、特定の要素で上書きする */
+    touch-action: none;
 }
 
 body {
@@ -35,17 +37,25 @@ header {
 
 .nav-bar {
     display: flex; justify-content: space-between; align-items: center;
-    margin-bottom: 8px; flex-shrink: 0; background: rgba(255,255,255,0.4);
-    padding: 5px 10px; border-radius: 15px; gap: 10px;
+    margin-bottom: 8px; flex-shrink: 0; background: rgba(255,255,255,0.6);
+    padding: 8px 12px; border-radius: 15px; gap: 10px;
 }
 
-.zoom-controls { display: flex; align-items: center; gap: 5px; flex: 1; }
-#zoom-slider { flex: 1; accent-color: var(--primary-green); }
+.zoom-controls { display: flex; align-items: center; gap: 8px; flex: 1; }
+
+/* スライダーがスマホで動くように touch-action を個別許可 */
+#zoom-slider {
+    flex: 1;
+    accent-color: var(--primary-green);
+    height: 25px; /* 指で触りやすいように少し太く */
+    touch-action: auto !important;
+    cursor: pointer;
+}
 
 .btn-group { display: flex; gap: 5px; }
 
 .nav-btn {
-    padding: 6px 10px; font-size: 11px; font-weight: bold;
+    padding: 8px 12px; font-size: 11px; font-weight: bold;
     background: white; border: 2px solid var(--primary-green);
     border-radius: 12px; color: var(--dark-green);
 }
@@ -81,6 +91,8 @@ main {
     flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05);
 }
 
+.draggable-piece { display: flex; justify-content: center; align-items: center; }
+.piece-grid { display: grid; gap: 2px; }
 .piece-block {
     width: 22px; height: 22px;
     background: var(--primary-green); border-radius: 2px;

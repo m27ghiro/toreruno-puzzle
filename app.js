@@ -107,7 +107,6 @@ function createPieceElement(piece, index) {
     gridEl.className = 'piece-grid';
     gridEl.style.display = 'grid';
     gridEl.style.gridTemplateColumns = `repeat(${piece.shape[0].length}, 1fr)`;
-    gridEl.style.gap = '2px';
 
     const centerY = Math.floor(piece.shape.length / 2);
     const centerX = Math.floor(piece.shape[0].length / 2);
@@ -148,7 +147,7 @@ function startDrag(e) {
     dragStartY = clientY - rect.top;
 
     activePiece.style.position = 'fixed';
-    activePiece.style.zIndex = '2000';
+    activePiece.style.zIndex = '10000';
     activePiece.style.transform = 'scale(1.1)';
     activePiece.style.pointerEvents = 'none';
 
@@ -335,4 +334,8 @@ function showGameOver() {
     finalScoreVal.textContent = score;
 }
 
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}

@@ -19,9 +19,9 @@ body {
 }
 
 .app-wrapper {
-    width: 100%; max-width: 400px;
+    width: 100%; max-width: 420px;
     height: 100%; display: flex; flex-direction: column;
-    padding: 8px;
+    padding: 10px;
 }
 
 header {
@@ -33,53 +33,51 @@ header {
 #score-display { font-weight: bold; font-size: 18px; color: var(--dark-green); }
 
 .nav-bar {
-    display: flex; gap: 8px; margin-bottom: 8px; flex-shrink: 0;
+    display: flex; gap: 8px; margin-bottom: 5px; flex-shrink: 0;
 }
 
 .nav-btn {
-    flex: 1; padding: 6px; font-size: 11px; font-weight: bold;
+    flex: 1; padding: 8px; font-size: 12px; font-weight: bold;
     background: white; border: 2px solid var(--primary-green);
     border-radius: 12px; color: var(--dark-green);
 }
 
 main {
     flex: 1; display: flex; flex-direction: column;
-    justify-content: space-between; align-items: center;
+    justify-content: space-around; align-items: center;
     min-height: 0;
 }
 
-.grid-outer {
-    width: 100%; display: flex; justify-content: center;
-    max-height: 45vh; /* 盤面を画面の45%以下に抑えて下のトレイを確実に守る */
-}
-
+/* 盤面サイズを絶対に消えない「画面の4割」の高さに固定 */
 .grid-container {
-    height: 100%; aspect-ratio: 1/1;
+    height: 42vh; width: 42vh; /* 高さを基準に正方形を作る */
+    max-width: 85vw; max-height: 85vw; /* 幅広画面でもはみ出さないように */
     background: rgba(255,255,255,0.9);
     border-radius: 10px; display: grid; gap: 2px; padding: 5px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 25px rgba(0,0,0,0.1);
 }
 
 .grid-cell { background: rgba(0,0,0,0.06); border-radius: 2px; position: relative; }
 .grid-cell.filled::after {
-    content: ''; position: absolute; 
-    top: 0.5%; left: 0.5%; width: 99%; height: 99%; /* 隙間1% */
+    content: ''; position: absolute; top: 0.5%; left: 0.5%; width: 99%; height: 99%;
     background: var(--primary-green); border-radius: 2px;
 }
 
 .grid-cell.highlight {
-    background: rgba(46, 204, 113, 0.3); /* ガイド表示用 */
+    background: rgba(46, 204, 113, 0.4); /* ガイドを少し濃く */
 }
 
 .piece-tray {
     width: 100%; height: 110px;
-    background: rgba(255,255,255,0.5);
+    background: rgba(255,255,255,0.4);
     border-radius: 20px; display: flex; justify-content: space-around; align-items: center;
     flex-shrink: 0; border: 1px solid rgba(0,0,0,0.05);
 }
 
+.draggable-piece { display: flex; justify-content: center; align-items: center; }
+.piece-grid { display: grid; gap: 2px; }
 .piece-block {
-    width: 20px; height: 20px;
+    width: 22px; height: 22px;
     background: var(--primary-green); border-radius: 2px;
     display: flex; justify-content: center; align-items: center;
 }
@@ -87,13 +85,13 @@ main {
 
 .overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-    background: white; z-index: 1000; display: flex; justify-content: center; align-items: center;
+    background: white; z-index: 5000; display: flex; justify-content: center; align-items: center;
 }
 .overlay.hidden { display: none; }
 .overlay-content { text-align: center; width: 85%; }
-.menu-logo { height: 70px; margin-bottom: 20px; }
-.difficulty-btn { width: 100%; padding: 18px; margin-bottom: 15px; border-radius: 30px; border: 3px solid var(--primary-green); font-weight: bold; background: white; }
+.menu-logo { height: 70px; margin-bottom: 25px; }
+.difficulty-btn { width: 100%; padding: 20px; margin-bottom: 15px; border-radius: 30px; border: 3px solid var(--primary-green); font-weight: bold; background: white; font-size: 18px; }
 
-.flash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 2000; }
+.flash-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; pointer-events: none; z-index: 10000; }
 .flash-active { animation: flash 0.3s ease-out; }
 @keyframes flash { 0% { opacity: 0.5; } 100% { opacity: 0; } }

@@ -1,4 +1,3 @@
-// Piece Definitions
 const PIECE_TYPES = [
     { shape: [[1]], color: '#2ecc71' },
     { shape: [[1, 1]], color: '#2ecc71' },
@@ -21,8 +20,7 @@ let dragStartX, dragStartY;
 let lastX, lastY;
 let lastState = null;
 
-// DOM Elements
-let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn;
+let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer;
 
 function init() {
     gridContainer = document.getElementById('grid-container');
@@ -33,22 +31,26 @@ function init() {
     restartBtn = document.getElementById('restart-btn');
     mainMenu = document.getElementById('main-menu');
     undoBtn = document.getElementById('undo-btn');
+    homeBtn = document.getElementById('home-btn');
+    flashLayer = document.getElementById('flash-layer');
 
-    const difficultyBtns = document.querySelectorAll('.difficulty-btn');
-    difficultyBtns.forEach(btn => {
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             const size = parseInt(btn.dataset.size);
             initGame(size);
         });
     });
 
-    restartBtn.addEventListener('click', () => {
-        gameOverOverlay.classList.add('hidden');
-        mainMenu.classList.remove('hidden');
-    });
-
+    restartBtn.addEventListener('click', backToHome);
+    homeBtn.addEventListener('click', backToHome);
     undoBtn.addEventListener('click', undo);
+    
     updateUndoButton();
+}
+
+function backToHome() {
+    gameOverOverlay.classList.add('hidden');
+    mainMenu.classList.remove('hidden');
 }
 
 function initGame(size = 10) {
@@ -88,6 +90,7 @@ function updateScore() {
 
 function generatePieces() {
     pieceTray.innerHTML = '';
+    // Ensure the tray is clean before generating
     for (let i = 0; i < 3; i++) {
         const pieceData = PIECE_TYPES[Math.floor(Math.random() * PIECE_TYPES.length)];
         createPieceElement(pieceData);
@@ -135,7 +138,6 @@ function createPieceElement(pieceData) {
 
 function startDrag(e) {
     if (activePiece) return;
-    
     activePiece = e.currentTarget;
     const rect = activePiece.getBoundingClientRect();
     
@@ -149,8 +151,8 @@ function startDrag(e) {
 
     activePiece.style.position = 'fixed';
     activePiece.style.width = rect.width + 'px';
-    activePiece.style.zIndex = '10000'; // High z-index
-    activePiece.style.transform = 'scale(1.25)';
+    activePiece.style.zIndex = '10000';
+    activePiece.style.transform = 'scale(1.2)';
     activePiece.style.pointerEvents = 'none';
     
     updateDragPosition(clientX, clientY);
@@ -169,13 +171,12 @@ function onDrag(e) {
     const clientY = e.type === 'touchmove' ? e.touches[0].clientY : e.clientY;
     lastX = clientX;
     lastY = clientY;
-    
     updateDragPosition(clientX, clientY);
 }
 
 function updateDragPosition(x, y) {
     activePiece.style.left = (x - dragStartX) + 'px';
-    activePiece.style.top = (y - dragStartY - 70) + 'px'; // Larger offset for finger
+    activePiece.style.top = (y - dragStartY - 80) + 'px'; // Even higher offset for visibility
 }
 
 function endDrag(e) {
@@ -301,7 +302,15 @@ function checkLines() {
         const linesCleared = rowsToClear.length + colsToClear.length;
         score += linesCleared * 100 * linesCleared;
         updateScore();
+        triggerFlash();
     }
+}
+
+function triggerFlash() {
+    flashLayer.classList.add('flash-active');
+    setTimeout(() => {
+        flashLayer.classList.remove('flash-active');
+    }, 300);
 }
 
 function animateClearing(rows, cols) {
@@ -325,7 +334,7 @@ function animateClearing(rows, cols) {
 
     setTimeout(() => {
         renderGrid();
-    }, 400);
+    }, 450);
 }
 
 function checkGameOver() {
@@ -391,7 +400,6 @@ function updateUndoButton() {
     }
 }
 
-// Ensure execution
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
 } else {

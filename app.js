@@ -23,37 +23,33 @@ let currentPiecesData = [];
 let gridContainer, pieceTray, scoreElement, gameOverOverlay, finalScoreVal, restartBtn, mainMenu, undoBtn, homeBtn, flashLayer;
 
 function init() {
-    try {
-        gridContainer = document.getElementById('grid-container');
-        pieceTray = document.getElementById('piece-tray');
-        scoreElement = document.getElementById('score');
-        gameOverOverlay = document.getElementById('game-over-overlay');
-        finalScoreVal = document.getElementById('final-score-val');
-        restartBtn = document.getElementById('restart-btn');
-        mainMenu = document.getElementById('main-menu');
-        undoBtn = document.getElementById('undo-btn');
-        homeBtn = document.getElementById('home-btn');
-        flashLayer = document.getElementById('flash-layer');
+    gridContainer = document.getElementById('grid-container');
+    pieceTray = document.getElementById('piece-tray');
+    scoreElement = document.getElementById('score');
+    gameOverOverlay = document.getElementById('game-over-overlay');
+    finalScoreVal = document.getElementById('final-score-val');
+    restartBtn = document.getElementById('restart-btn');
+    mainMenu = document.getElementById('main-menu');
+    undoBtn = document.getElementById('undo-btn');
+    homeBtn = document.getElementById('home-btn');
+    flashLayer = document.getElementById('flash-layer');
 
-        document.querySelectorAll('.difficulty-btn').forEach(btn => {
-            btn.addEventListener('click', () => initGame(parseInt(btn.dataset.size)));
-        });
+    document.querySelectorAll('.difficulty-btn').forEach(btn => {
+        btn.addEventListener('click', () => initGame(parseInt(btn.dataset.size)));
+    });
 
-        restartBtn.addEventListener('click', () => {
-            gameOverOverlay.classList.add('hidden');
-            mainMenu.classList.remove('hidden');
-        });
+    restartBtn.addEventListener('click', () => {
+        gameOverOverlay.classList.add('hidden');
+        mainMenu.classList.remove('hidden');
+    });
 
-        homeBtn.addEventListener('click', () => {
-            mainMenu.classList.remove('hidden');
-            gameOverOverlay.classList.add('hidden');
-        });
+    homeBtn.addEventListener('click', () => {
+        mainMenu.classList.remove('hidden');
+        gameOverOverlay.classList.add('hidden');
+    });
 
-        undoBtn.addEventListener('click', undo);
-        updateScore();
-    } catch (e) {
-        console.error("Init Error:", e);
-    }
+    undoBtn.addEventListener('click', undo);
+    updateScore();
 }
 
 function initGame(size) {
@@ -162,12 +158,16 @@ function startDrag(e) {
         const mx = me.type.startsWith('touch') ? me.touches[0].clientX : me.clientX;
         const my = me.type.startsWith('touch') ? me.touches[0].clientY : me.clientY;
         updateDragPosition(mx, my);
+        showPreview(mx, my);
     };
 
     const endHandler = (ee) => {
         const ex = ee.type.startsWith('touch') ? ee.changedTouches[0].clientX : ee.clientX;
         const ey = ee.type.startsWith('touch') ? ee.changedTouches[0].clientY : ee.clientY;
+        
+        clearPreview();
         handleDrop(ex, ey);
+        
         document.removeEventListener('mousemove', moveHandler);
         document.removeEventListener('touchmove', moveHandler);
         document.removeEventListener('mouseup', endHandler);
@@ -185,13 +185,48 @@ function updateDragPosition(x, y) {
     activePiece.style.top = (y - dragStartY - 70) + 'px'; 
 }
 
-function handleDrop(x, y) {
+function getGridCoords(x, y) {
     const gridRect = gridContainer.getBoundingClientRect();
     const cellSize = gridRect.width / GRID_SIZE;
-    
-    // Drop coordinates adjustment
     const gx = Math.floor((x - gridRect.left) / cellSize);
     const gy = Math.floor((y - 70 - gridRect.top) / cellSize); 
+    return { gx, gy };
+}
+
+function showPreview(x, y) {
+    clearPreview();
+    const { gx, gy } = getGridCoords(x, y);
+    const pieceIdx = parseInt(activePiece.dataset.index);
+    const piece = currentPiecesData[pieceIdx];
+
+    if (canPlace(piece, gx, gy)) {
+        highlightGrid(piece, gx, gy);
+    }
+}
+
+function clearPreview() {
+    document.querySelectorAll('.grid-cell.highlight').forEach(el => el.classList.remove('highlight'));
+}
+
+function highlightGrid(piece, centerX, centerY) {
+    const shape = piece.shape;
+    const offX = Math.floor(shape[0].length / 2);
+    const offY = Math.floor(shape.length / 2);
+    const cells = gridContainer.children;
+    for (let y = 0; y < shape.length; y++) {
+        for (let x = 0; x < shape[y].length; x++) {
+            if (shape[y][x]) {
+                const tx = centerX - offX + x;
+                const ty = centerY - offY + y;
+                const idx = ty * GRID_SIZE + tx;
+                if (cells[idx]) cells[idx].classList.add('highlight');
+            }
+        }
+    }
+}
+
+function handleDrop(x, y) {
+    const { gx, gy } = getGridCoords(x, y);
 
     if (gx >= 0 && gx < GRID_SIZE && gy >= 0 && gy < GRID_SIZE) {
         const pieceIdx = parseInt(activePiece.dataset.index);

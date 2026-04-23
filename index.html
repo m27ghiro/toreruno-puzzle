@@ -10,9 +10,7 @@
     <div class="app-wrapper">
         <header>
             <img src="logo.png" alt="TORERUNO" class="header-logo">
-            <div class="score-area">
-                <span id="score">0</span>
-            </div>
+            <div id="score-display">SCORE: <span id="score">0</span></div>
         </header>
 
         <div class="nav-bar">
@@ -21,7 +19,9 @@
         </div>
 
         <main>
-            <div id="grid-container" class="grid-container"></div>
+            <div class="grid-outer">
+                <div id="grid-container" class="grid-container"></div>
+            </div>
             <div id="piece-tray" class="piece-tray"></div>
         </main>
 
@@ -29,7 +29,7 @@
         <div id="main-menu" class="overlay">
             <div class="overlay-content">
                 <img src="logo.png" alt="TORERUNO" class="menu-logo">
-                <h2>癒しのパズル</h2>
+                <h3>癒しのパズル</h3>
                 <div class="difficulty-options">
                     <button class="difficulty-btn" data-size="8">EASY (8x8)</button>
                     <button class="difficulty-btn" data-size="10">NORMAL (10x10)</button>
